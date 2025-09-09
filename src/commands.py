@@ -24,7 +24,8 @@ def setup_commands(bot):
 
             source = discord.FFmpegPCMAudio("../music_temp/temp.mp3")
             interaction.guild.voice_client.play(source)
-            await interaction.followup.send("Now playing music!")
+            #await interaction.followup.send("Now playing music!")
+            # avoid respond over 10s TimeoutError
         else:
             await interaction.response.send_message("Please let the bot join a voice channel first, use `/join` command!", ephemeral=True)
 
@@ -36,6 +37,25 @@ def setup_commands(bot):
         else:
             await interaction.response.send_message("No audio is playing!", ephemeral=True)
 
+    @bot.tree.command(name="pause", description="Pause playing audio")
+    async def pause(interaction: discord.Interaction):
+        if interaction.guild.voice_client and interaction.guild.voice_client.is_playing():
+            interaction.guild.voice_client.pause()
+            await interaction.response.send_message("Paused playing audio!")
+        elif interaction.guild.voice_client and interaction.guild.voice_client.is_paused():
+            await interaction.response.send_message("Audio is already paused!", ephemeral=True)
+        else:
+            await interaction.response.send_message("No audio is playing!", ephemeral=True)
+
+    @bot.tree.command(name="continue", description="Continue playing paused audio")
+    async def continue_playing(interaction: discord.Interaction):
+        if interaction.guild.voice_client and interaction.guild.voice_client.is_paused():
+            interaction.guild.voice_client.resume()
+            await interaction.response.send_message("Resumed playing audio!")
+        elif interaction.guild.voice_client and interaction.guild.voice_client.is_playing():
+            await interaction.response.send_message("Audio is already playing!", ephemeral=True)
+        else:
+            await interaction.response.send_message("No audio is paused!", ephemeral=True)
     @bot.tree.command(name="leave", description="Make the bot leave the voice channel")
     async def leave(interaction: discord.Interaction):
         voice_client = interaction.guild.voice_client
